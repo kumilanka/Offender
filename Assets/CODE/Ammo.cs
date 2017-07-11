@@ -22,10 +22,12 @@ public class Ammo : MonoBehaviour
 
     public void OnCollisionEnter2D(Collision2D c)
     {
-        if (c.collider.gameObject.tag == "Enemy")
-            Destroy(c.collider.gameObject);
+        if (c.gameObject.tag == "Enemy")
+        {
+            c.gameObject.GetComponent<Enemy>().Kill();
+        }
 
-        if (c.collider.gameObject.tag != "Player")
+        if (c.collider.gameObject.tag != "Player" && c.gameObject.tag != "Ammo")
             Destroy(gameObject);
     }
 }
