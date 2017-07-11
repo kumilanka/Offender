@@ -19,4 +19,13 @@ public class Ammo : MonoBehaviour
         if (r_lifetime <= 0f)
             Destroy(gameObject);
 	}
+
+    public void OnCollisionEnter2D(Collision2D c)
+    {
+        if (c.collider.gameObject.tag == "Enemy")
+            Destroy(c.collider.gameObject);
+
+        if (c.collider.gameObject.tag != "Player")
+            Destroy(gameObject);
+    }
 }

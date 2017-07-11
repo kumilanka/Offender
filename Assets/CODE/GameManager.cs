@@ -28,7 +28,7 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        SoundManager.instance.PlayMusic("IntroMusic");
+        OnGameOver();
     }
 	
 	void Update ()
