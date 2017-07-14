@@ -22,8 +22,8 @@ public class Player : MonoBehaviour
         rigidbody2d = GetComponent<Rigidbody2D>();
         horizontalVelocity = 0f;
 	}
-	
-	void FixedUpdate ()
+
+    void Update()
     {
         // normal shooting using space for now
         if (Input.GetKeyDown(KeyCode.Space))
@@ -32,6 +32,11 @@ public class Player : MonoBehaviour
             ammo.GetComponent<Rigidbody2D>().velocity = new Vector2(rigidbody2d.velocity.x + shootVelocity * (facingRight ? 1f : -1f), 0f);
             SoundManager.instance.PlaySound("Laser");
         }
+    }
+	
+	void FixedUpdate ()
+    {
+        
 
         float horizontal = rigidbody2d.velocity.x;
         float vertical = 0f;
