@@ -16,10 +16,11 @@ public class GameManager : MonoBehaviour
     public Sprite soundOnSprite;
     public Sprite soundOffSprite;
 
-    public GameObject leftEdge;
-    public GameObject rightEdge;
+    public LevelBackground background;
 
-    public GameObject starPrefab;
+    public Player player;
+
+    
 
     public GameObject startScreen;
     [HideInInspector]
@@ -34,43 +35,10 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         OnGameOver();
-        CreateStarField();
-    }
-
-    private void CreateStarField()
-    {
-        int gridHeight = 20;
-        int gridWidth = 80;
-
-        float leftEdgePoint = leftEdge.transform.position.x;
-        float rightEdgePoint = rightEdge.transform.position.x;
-        float topEdgePoint = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 1f, 0f)).y;
-        float bottomEdgePoint = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0f, 0f)).y;
-
-        for (int i = 0; i < gridHeight; i++)
-        {
-            for (int j = 0; j < gridWidth; j++)
-            {
-                if (Mathf.PerlinNoise(i * 20.1f, j * 20.1f) > 0.7f)
-                {
-                    float xPos = leftEdgePoint - (((float)j / gridWidth) * (leftEdgePoint - rightEdgePoint));
-                    float yPos = topEdgePoint - (((float)i / gridHeight) * (topEdgePoint - bottomEdgePoint));
-
-                    xPos += Random.Range(-1f, 1f);
-                    yPos += Random.Range(-1f, 1f);
-                    GameObject star = Instantiate(starPrefab, new Vector2(xPos, yPos), Quaternion.identity);
-                    FlashySprite fs = star.GetComponent<FlashySprite>();
-                    fs.colorCycleTime = Random.Range(0.1f, 0.3f);
-                    fs.colorCycleStart = Random.Range(0f, fs.colorCycleTime);
-                    fs.alphaCycleTime = Random.Range(2f, 5f);
-                    fs.alphaCycleStart = Random.Range(0f, fs.alphaCycleTime);
-
-                    star.transform.localScale = star.transform.localScale * Random.Range(0.8f, 1.2f);
-                }
-            }
-        }
         
     }
+
+    
 	
 	void Update ()
     {

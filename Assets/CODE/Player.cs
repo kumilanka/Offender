@@ -104,5 +104,17 @@ public class Player : MonoBehaviour
             facingRight = false;
             ship.transform.localScale = new Vector3(ship.transform.localScale.x * -1f, ship.transform.localScale.y, ship.transform.localScale.z);
         }
-	}
+
+        if (transform.position.x < GameManager.instance.background.leftEdge.transform.position.x)
+        {
+            transform.position += new Vector3(GameManager.instance.background.levelWidth, 0f);
+            Camera.main.transform.position += new Vector3(GameManager.instance.background.levelWidth, 0f);
+        }
+
+        if (transform.position.x > GameManager.instance.background.rightEdge.transform.position.x)
+        {
+            transform.position -= new Vector3(GameManager.instance.background.levelWidth, 0f);
+            Camera.main.transform.position -= new Vector3(GameManager.instance.background.levelWidth, 0f);
+        }
+    }
 }
