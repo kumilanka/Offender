@@ -10,14 +10,29 @@ public class LevelBackground : MonoBehaviour
     public GameObject rightEdge;
     public List<GameObject> backgroundPrefabs = new List<GameObject>();
 
-    public GameObject world1;
-    public GameObject world2;
+    [HideInInspector]
+    public GameObject center;
+    [HideInInspector]
+    public GameObject left;
+    [HideInInspector]
+    public GameObject right;
+    [HideInInspector]
+    public GameObject ground;
 
     public float levelWidth
     {
         get
         {
             return Mathf.Abs(leftEdge.transform.position.x - rightEdge.transform.position.x);
+        }
+    }
+
+    public Rect groundRect
+    {
+        get
+        {
+            SpriteRenderer spr = ground.GetComponent<SpriteRenderer>();
+            return new Rect(spr.bounds.center - spr.bounds.extents, ground.GetComponent<SpriteRenderer>().bounds.size);
         }
     }
 
@@ -43,8 +58,8 @@ public class LevelBackground : MonoBehaviour
         float bottomEdgePoint = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0f, 0f)).y;
 
         // build the background stuff procedurally under a common root object
-        GameObject background = new GameObject("center");
-        background.transform.SetParent(transform);
+        center = new GameObject("center");
+        center.transform.SetParent(transform);
 
         // use perlin noise to generate some stars
         for (int i = 0; i < gridHeight; i++)
@@ -58,7 +73,7 @@ public class LevelBackground : MonoBehaviour
 
                     xPos += Random.Range(-1f, 1f);
                     yPos += Random.Range(-1f, 1f);
-                    GameObject star = Instantiate(starPrefab, background.transform);
+                    GameObject star = Instantiate(starPrefab, center.transform);
                     //GameObject star = Instantiate(starPrefab, new Vector2(xPos, yPos), Quaternion.identity);
                     star.transform.position = new Vector2(xPos, yPos);
                     FlashySprite fs = star.GetComponent<FlashySprite>();
@@ -73,7 +88,7 @@ public class LevelBackground : MonoBehaviour
         }
 
         // generate a ground object using a tiled sprite
-        GameObject ground = Instantiate(backgroundPrefabs.Find(x => x.name == "Ground"), background.transform);
+        ground = Instantiate(backgroundPrefabs.Find(x => x.name == "Ground"), center.transform);
         ground.transform.position = new Vector2(0f, -3f);
 
         float groundTopPoint = ground.transform.position.y + ground.GetComponent<SpriteRenderer>().bounds.extents.y;
@@ -112,13 +127,13 @@ public class LevelBackground : MonoBehaviour
         }
 
 
-        GameObject copyBackground = Instantiate(background, transform);
-        copyBackground.name = "right";
-        copyBackground.transform.localPosition = new Vector2(levelWidth, 0f);
+        right = Instantiate(center, transform);
+        right.name = "right";
+        right.transform.localPosition = new Vector2(levelWidth, 0f);
 
-        copyBackground = Instantiate(background, transform);
-        copyBackground.name = "left";
-        copyBackground.transform.localPosition = new Vector2(-levelWidth, 0f);
+        left = Instantiate(center, transform);
+        left.name = "left";
+        left.transform.localPosition = new Vector2(-levelWidth, 0f);
 
     }
 
