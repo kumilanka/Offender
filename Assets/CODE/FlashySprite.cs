@@ -57,7 +57,8 @@ public class FlashySprite : MonoBehaviour
             h = Mathf.Lerp(0f, 1f, currentColorCycleTime / colorCycleTime);
             Color c = Color.HSVToRGB(h, s, v);
             // alpha cycle is a sine wave between 0 and 1, so the stars kind of "pulse"
-            c.a = 0.5f * (1f + Mathf.Sin(2 * Mathf.PI * 1f * currentAlphaCycleTime / alphaCycleTime));
+            float sineValue = 0.5f * (1f + Mathf.Sin(2 * Mathf.PI * 1f * currentAlphaCycleTime / alphaCycleTime));
+            c.a = 0.1f + 0.5f * sineValue;
             spriteRenderer.color = c;
         }
 	}

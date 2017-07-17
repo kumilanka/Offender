@@ -18,7 +18,9 @@ public class GameManager : MonoBehaviour
 
     public LevelBackground background;
 
+    [HideInInspector]
     public Player player;
+    public GameObject playerPrefab;
 
     public GameObject alienPrefab;
     public GameObject wheelchairPrefab;
@@ -35,6 +37,12 @@ public class GameManager : MonoBehaviour
 
     private float gameTimer;
     public Level currentLevel;
+
+    public int lives = 3;
+    public int score = 0;
+
+    public List<GameObject> lifeObjects = new List<GameObject>();
+    public Text scoreLabel;
 
 	void Awake ()
     {
@@ -83,6 +91,8 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
+
+        UpdateGameUI();
 	}
 
     public void OnSoundButtonPressed()
@@ -109,6 +119,7 @@ public class GameManager : MonoBehaviour
     {
         // press any key to start
         game = true;
+        
 
         SoundManager.instance.StopMusic();
         SoundManager.instance.PlaySound("Weird");
@@ -118,12 +129,29 @@ public class GameManager : MonoBehaviour
         StartNewGame();
     }
 
+    public void OnPlayerDeath()
+    {
+        lives--;
+        if (lives < 1)
+            OnGameOver();
+        else
+            SpawnPlayer();
+    }
+
+    public void SpawnPlayer()
+    {
+        Instantiate(playerPrefab);
+    }
+
     public void StartNewGame()
     {
         SpawnWheelchairs();
         gameTimer = 0f;
+        lives = 3;
+        score = 0;
 
         currentLevel = levels[0];
+        SpawnPlayer();
     }
 
     public void SpawnWheelchairs()
@@ -166,5 +194,21 @@ public class GameManager : MonoBehaviour
         Debug.Log("No wheelchairs available right now!");
 
         return null;
+    }
+
+    /// <summary>
+    /// Updates the game time ui which is currently just the lives display and the score display
+    /// </summary>
+    private void UpdateGameUI()
+    {
+        foreach (GameObject lifeObject in lifeObjects)
+        {
+            if (lives > lifeObjects.IndexOf(lifeObject))
+                lifeObject.SetActive(true);
+            else
+                lifeObject.SetActive(false);
+        }
+
+        scoreLabel.text = string.Format("{0}", score);
     }
 }

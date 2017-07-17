@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class LevelBackground : MonoBehaviour
 {
-    public GameObject starPrefab;
+    public List<GameObject> starPrefabs = new List<GameObject>();
 
     public GameObject leftEdge;
     public GameObject rightEdge;
@@ -73,7 +73,7 @@ public class LevelBackground : MonoBehaviour
 
                     xPos += Random.Range(-1f, 1f);
                     yPos += Random.Range(-1f, 1f);
-                    GameObject star = Instantiate(starPrefab, center.transform);
+                    GameObject star = Instantiate(GetRandomStarPrefab(), center.transform);
                     //GameObject star = Instantiate(starPrefab, new Vector2(xPos, yPos), Quaternion.identity);
                     star.transform.position = new Vector2(xPos, yPos);
                     FlashySprite fs = star.GetComponent<FlashySprite>();
@@ -89,7 +89,9 @@ public class LevelBackground : MonoBehaviour
 
         // generate a ground object using a tiled sprite
         ground = Instantiate(backgroundPrefabs.Find(x => x.name == "Ground"), center.transform);
-        ground.transform.position = new Vector2(0f, -3f);
+        ground.GetComponent<SpriteRenderer>().size = new Vector2(levelWidth, ground.GetComponent<SpriteRenderer>().size.y);
+
+        ground.transform.position = new Vector2(0f, Camera.main.ViewportToWorldPoint(new Vector2(0.5f, 0f)).y);
 
         float groundTopPoint = ground.transform.position.y + ground.GetComponent<SpriteRenderer>().bounds.extents.y;
         float groundBottomPoint = ground.transform.position.y - ground.GetComponent<SpriteRenderer>().bounds.extents.y;
@@ -104,8 +106,9 @@ public class LevelBackground : MonoBehaviour
             {
                 if (Mathf.PerlinNoise(i * 20.1f, j * 20.1f) > 0.8f)
                 {
+
                     float xPos = leftEdgePoint - (((float)j / gridWidth) * (leftEdgePoint - rightEdgePoint));
-                    float yPos = groundTopPoint - (((float)i / gridHeight) * (groundTopPoint - groundBottomPoint));
+                    float yPos = groundRect.yMax - (((float)i / gridHeight) * (groundRect.yMax - groundRect.yMin));
 
                     xPos += Random.Range(-0.1f, 0.1f);
                     //yPos += Random.Range(-1f, 1f);
@@ -135,6 +138,11 @@ public class LevelBackground : MonoBehaviour
         left.name = "left";
         left.transform.localPosition = new Vector2(-levelWidth, 0f);
 
+    }
+
+    private GameObject GetRandomStarPrefab()
+    {
+        return starPrefabs[Random.Range(0, starPrefabs.Count)];
     }
 
     private GameObject GetRandomGroundClutterPrefab()

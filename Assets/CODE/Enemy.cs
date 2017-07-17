@@ -44,7 +44,9 @@ public class Enemy : MonoBehaviour
         if (wheelchair == null)
         {
             // no wheelchairs available, go for the player instead
-            target = GameObject.FindGameObjectWithTag("Player").transform;
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null)
+                target = player.transform;
         }
         else
         {
@@ -58,6 +60,8 @@ public class Enemy : MonoBehaviour
     {
         Instantiate(explosion, transform.position, Quaternion.identity);
         SoundManager.instance.PlaySound("Explosion");
+
+        GameManager.instance.score += 100;
 
         Destroy(gameObject);
     }

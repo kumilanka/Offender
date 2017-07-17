@@ -17,7 +17,25 @@ public class PlayerCamera : MonoBehaviour
 	// Update is called once per frame
 	void FixedUpdate ()
     {
-        Vector3 targetPos = new Vector3(followTarget.position.x, transform.position.y, transform.position.z);
-        transform.position = Vector3.SmoothDamp(transform.position, targetPos, ref currentPos, smoothTime, maxSpeed, Time.deltaTime);
+        if (followTarget != null) // if the followtarget is there, follow it using smoothdamp
+        {
+            Vector3 targetPos = new Vector3(followTarget.position.x, transform.position.y, transform.position.z);
+            transform.position = Vector3.SmoothDamp(transform.position, targetPos, ref currentPos, smoothTime, maxSpeed, Time.deltaTime);
+        }
+        else // otherwise look for player and jump the camera to the player when found, then start following again
+        {
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null)
+            {
+                followTarget = player.GetComponent<Player>().cameraFollowPosition;
+                WarpCamera();
+            }
+        }
 	}
+
+    private void WarpCamera()
+    {
+        Vector3 targetPos = new Vector3(followTarget.position.x, transform.position.y, transform.position.z);
+        transform.position = targetPos;
+    }
 }
