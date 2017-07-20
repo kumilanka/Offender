@@ -6,15 +6,21 @@ public class WrapAroundEdges : MonoBehaviour
 {
     public bool moveCamera = false;
     public GameObject graphics;
+    [HideInInspector]
+    public GameObject leftMirage;
+
+    [HideInInspector]
+    public GameObject rightMirage;
+
 
 	// Use this for initialization
 	void Start ()
     {
         if (graphics != null)
         {
-            GameObject leftMirage = Instantiate(graphics, graphics.transform.parent);
+            leftMirage = Instantiate(graphics, graphics.transform.parent);
             leftMirage.transform.position -= new Vector3(GameManager.instance.background.levelWidth, 0f);
-            GameObject rightMirage = Instantiate(graphics, graphics.transform.parent);
+            rightMirage = Instantiate(graphics, graphics.transform.parent);
             rightMirage.transform.position += new Vector3(GameManager.instance.background.levelWidth, 0f);
         }
     }

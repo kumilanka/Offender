@@ -11,6 +11,7 @@ public class Enemy : MonoBehaviour
 {
     public GameObject explosion;
 
+    
     [System.NonSerialized]
     public Transform target;
 
@@ -31,7 +32,7 @@ public class Enemy : MonoBehaviour
         }
         else
         {
-            Vector3 dir = target.position - transform.position;
+            Vector3 dir = GameManager.instance.WrapDirection(transform.position, target.position);
 
             GetComponent<Rigidbody2D>().velocity = dir.normalized * normalSpeed;
         }
@@ -62,6 +63,16 @@ public class Enemy : MonoBehaviour
         SoundManager.instance.PlaySound("Explosion");
 
         GameManager.instance.score += 100;
+
+        // if we're using wrap-around, also instantiate an explosion for the copies 
+        WrapAroundEdges wrp = GetComponent<WrapAroundEdges>();
+        if (wrp != null)
+        {
+            Instantiate(explosion, wrp.leftMirage.transform.position, Quaternion.identity);
+            Instantiate(explosion, wrp.rightMirage.transform.position, Quaternion.identity);
+        }
+
+        GameManager.instance.UnregisterAlien(gameObject);
 
         Destroy(gameObject);
     }

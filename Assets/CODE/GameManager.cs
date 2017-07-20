@@ -30,6 +30,8 @@ public class GameManager : MonoBehaviour
     private List<GameObject> wheelchairs = new List<GameObject>(); // list of all the wheelchairs in the level
     private List<GameObject> availableWheelchairs = new List<GameObject>(); // list of all the wheelchairs available for targeting
 
+    private List<GameObject> aliens = new List<GameObject>();
+
 
     public GameObject startScreen;
     [HideInInspector]
@@ -44,6 +46,8 @@ public class GameManager : MonoBehaviour
     public List<GameObject> lifeObjects = new List<GameObject>();
     public Text scoreLabel;
 
+    public GameObject gameUI;
+
 	void Awake ()
     {
         // pseudo-singleton for easy access
@@ -56,6 +60,23 @@ public class GameManager : MonoBehaviour
         
     }
 
+    public void RegisterAlien(GameObject alien)
+    {
+        if (!aliens.Contains(alien))
+            aliens.Add(alien);
+    }
+
+    public void UnregisterAlien(GameObject alien)
+    {
+        if (aliens.Contains(alien))
+            aliens.Remove(alien);
+
+        // if alien had a target, release it so others may give chase
+        Enemy e = alien.GetComponent<Enemy>();
+        if (e.target != null && e.target.GetComponent<Wheelchair>() != null)
+            if (!availableWheelchairs.Contains(e.target.gameObject))
+                availableWheelchairs.Add(e.target.gameObject);
+    }
     
 	
 	void Update ()
@@ -85,7 +106,8 @@ public class GameManager : MonoBehaviour
                             float xPos = groundRect.xMin + single / 2f + (single * i);
                             float yPos = Camera.main.ViewportToWorldPoint(new Vector2(0f, 0.9f)).y;
 
-                            Instantiate(alienPrefab, new Vector2(xPos, yPos), Quaternion.identity);
+                            GameObject alien = Instantiate(alienPrefab, new Vector2(xPos, yPos), Quaternion.identity);
+                            RegisterAlien(alien);
                         }
                     }
                 }
@@ -94,6 +116,55 @@ public class GameManager : MonoBehaviour
 
         UpdateGameUI();
 	}
+
+    public float WrapDistance(Vector2 worldPos1, Vector2 worldPos2)
+    {
+        float normalDistance = Vector2.Distance(worldPos1, worldPos2);
+        // return the shorter distance between the two points, with x wrapped around using the level width
+        if (worldPos1.x > worldPos2.x)
+        {
+            float wrapAroundPosDistance = Vector2.Distance(new Vector2(worldPos1.x - background.levelWidth, worldPos1.y), worldPos2);
+            return Mathf.Min(normalDistance, wrapAroundPosDistance);
+        }
+        else
+        {
+            float wrapAroundPosDistance = Vector2.Distance(new Vector2(worldPos1.x + background.levelWidth, worldPos1.y), worldPos2);
+            return Mathf.Min(normalDistance, wrapAroundPosDistance);
+        }
+    }
+
+    public Vector2 WrapDirection(Vector2 worldPos1, Vector2 worldPos2)
+    {
+        // return the wraparound direction from pos 1 toward pos 2, wrapped for x-axis around the level width
+
+        // if the wraparound distance is bigger than the actual distance
+        if (Vector2.Distance(worldPos1, worldPos2) <= WrapDistance(worldPos1, worldPos2))
+        {
+            Vector2 dir = worldPos2 - worldPos1;
+
+            // just use the normal direction
+            return dir;
+        }
+        else
+        {
+
+            Vector2 dir = worldPos1.x > worldPos2.x ?
+                // wrap to the left
+                worldPos2 - new Vector2(worldPos1.x - background.levelWidth, worldPos1.y) :
+                // wrap to the right
+                worldPos2 - new Vector2(worldPos1.x + background.levelWidth, worldPos1.y);
+
+            // use the wraparound direction instead (since it's shorter)
+            return dir;
+        }
+    }
+
+    // utility function to wrap the world x coordinates around the level
+    public Vector2 WrapX(Vector2 worldPos)
+    {
+        float leftPos = background.leftEdge.transform.position.x;
+        return new Vector2(leftPos + Mathf.Repeat(worldPos.x, background.levelWidth), worldPos.y);
+    }
 
     public void OnSoundButtonPressed()
     {
@@ -110,9 +181,25 @@ public class GameManager : MonoBehaviour
     // call to return to title screen
     public void OnGameOver()
     {
+        // clean up the lists of aliens and wheelchairs for the next play
+        foreach (GameObject alien in aliens)
+        {
+            Destroy(alien);
+        }
+        aliens.Clear();
+
+        foreach (GameObject wheelchair in wheelchairs)
+        {
+            Destroy(wheelchair);
+        }
+
+        wheelchairs.Clear();
+        availableWheelchairs.Clear();
+
         game = false;
         SoundManager.instance.PlayMusic("IntroMusic");
         startScreen.SetActive(true);
+        gameUI.SetActive(false);
     }
 
     public void OnStartGameButtonPressed()
@@ -125,6 +212,7 @@ public class GameManager : MonoBehaviour
         SoundManager.instance.PlaySound("Weird");
 
         startScreen.SetActive(false);
+        gameUI.SetActive(true);
 
         StartNewGame();
     }
@@ -182,7 +270,7 @@ public class GameManager : MonoBehaviour
 
         if (availableWheelchairs.Count > 0)
         {
-            availableWheelchairs.Sort((x, y) => Vector2.Distance(position, x.transform.position) < Vector2.Distance(position, y.transform.position) ? -1 : 1);
+            availableWheelchairs.Sort((x, y) => WrapDistance(position, x.transform.position) < WrapDistance(position, y.transform.position) ? -1 : 1);
 
             GameObject wheelchair = availableWheelchairs[0];
 

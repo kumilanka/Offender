@@ -10,7 +10,17 @@ public class Player : MonoBehaviour
     public Transform shootPosition;
     public Transform cameraFollowPosition;
     public float shootVelocity;
-    private bool facingRight;
+    private bool facingRight
+    {
+        get
+        {
+            // moved this to the flip by velocity component, which handles the turning of the graphic (set x scale to negative) by x velocity
+            FlipByVelocity fbv = GetComponent<FlipByVelocity>();
+            if (fbv != null)
+                return GetComponent<FlipByVelocity>().graphics.transform.localScale.x < 0f;
+            return false;
+        }
+    }
     public float maxHorizontalVelocity = 1f;
     public float maxVerticalVelocity = 1f;
     public float horizontalAcceleration = 0.05f;
@@ -112,16 +122,16 @@ public class Player : MonoBehaviour
 
         //transform.position += new Vector3(horizontal, vertical, 0f) * maxHorizontalSpeed;
 
-        if (horizontal > 0f && !facingRight)
-        {
-            facingRight = true;
-            ship.transform.localScale = new Vector3(ship.transform.localScale.x * -1f, ship.transform.localScale.y, ship.transform.localScale.z);
-        }
+        //if (horizontal > 0f && !facingRight)
+        //{
+        //    facingRight = true;
+        //    ship.transform.localScale = new Vector3(ship.transform.localScale.x * -1f, ship.transform.localScale.y, ship.transform.localScale.z);
+        //}
 
-        else if (horizontal < 0f && facingRight)
-        {
-            facingRight = false;
-            ship.transform.localScale = new Vector3(ship.transform.localScale.x * -1f, ship.transform.localScale.y, ship.transform.localScale.z);
-        }
+        //else if (horizontal < 0f && facingRight)
+        //{
+        //    facingRight = false;
+        //    ship.transform.localScale = new Vector3(ship.transform.localScale.x * -1f, ship.transform.localScale.y, ship.transform.localScale.z);
+        //}
     }
 }
