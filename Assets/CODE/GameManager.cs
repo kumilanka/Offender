@@ -12,10 +12,6 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
 
-    public Button soundButton;
-    public Sprite soundOnSprite;
-    public Sprite soundOffSprite;
-
     public LevelBackground background;
 
     [HideInInspector]
@@ -32,8 +28,6 @@ public class GameManager : MonoBehaviour
 
     private List<GameObject> aliens = new List<GameObject>();
 
-
-    public GameObject startScreen;
     [HideInInspector]
     public bool game; // whether the game is running or not (to display title screen)
 
@@ -43,10 +37,7 @@ public class GameManager : MonoBehaviour
     public int lives = 3;
     public int score = 0;
 
-    public List<GameObject> lifeObjects = new List<GameObject>();
-    public Text scoreLabel;
-
-    public GameObject gameUI;
+    public List<Tuple<string, int>> highscoreTable = new List<Tuple<string, int>>();
 
 	void Awake ()
     {
@@ -56,8 +47,9 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        SaveManager.instance.Load(); // load saved settings (uses PlayerPrefs because lazy)
+        UIManager.instance.UpdateInitialUIState();
         OnGameOver();
-        
     }
 
     public void RegisterAlien(GameObject alien)
@@ -114,7 +106,7 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        UpdateGameUI();
+        
 	}
 
     public float WrapDistance(Vector2 worldPos1, Vector2 worldPos2)
@@ -166,18 +158,6 @@ public class GameManager : MonoBehaviour
         return new Vector2(leftPos + Mathf.Repeat(worldPos.x, background.levelWidth), worldPos.y);
     }
 
-    public void OnSoundButtonPressed()
-    {
-        // toggle the mute flag
-        SoundManager.instance.Mute = !SoundManager.instance.Mute;
-
-        // update the button graphic
-        if (soundButton != null)
-        {
-            soundButton.image.sprite = SoundManager.instance.Mute ? soundOffSprite : soundOnSprite;
-        }
-    }
-
     // call to return to title screen
     public void OnGameOver()
     {
@@ -198,8 +178,42 @@ public class GameManager : MonoBehaviour
 
         game = false;
         SoundManager.instance.PlayMusic("IntroMusic");
-        startScreen.SetActive(true);
-        gameUI.SetActive(false);
+
+        if (IsHighScore(score))
+        {
+            UIManager.instance.SetState(UIManager.UIStates.NameInput);
+        }
+        else
+            UIManager.instance.SetState(UIManager.UIStates.TitleRotation);
+    }
+
+    public bool IsHighScore(int score)
+    {
+        foreach (Tuple<string, int> highscore in highscoreTable)
+        {
+            if (score > highscore.two) // only allow highscore that is bigger than the existing one, got the same one? Too bad, someone got there first.
+                return true;
+        }
+
+        return false;
+    }
+
+    public void RecordHighScore(string name, int score)
+    {
+        for (int i = 0; i < highscoreTable.Count; i++)
+        {
+            if (score > highscoreTable[i].two)
+            {
+                // insert at the first place where the score is higher than current, bumping everything down by one
+                highscoreTable.Insert(i, new Tuple<string, int>(name, score));
+                // then remove the last one on the list
+                highscoreTable.RemoveAt(highscoreTable.Count - 1);
+
+                SaveManager.instance.Save();
+
+                return;
+            }
+        }
     }
 
     public void OnStartGameButtonPressed()
@@ -211,8 +225,7 @@ public class GameManager : MonoBehaviour
         SoundManager.instance.StopMusic();
         SoundManager.instance.PlaySound("Weird");
 
-        startScreen.SetActive(false);
-        gameUI.SetActive(true);
+        UIManager.instance.SetState(UIManager.UIStates.Game);
 
         StartNewGame();
     }
@@ -284,19 +297,5 @@ public class GameManager : MonoBehaviour
         return null;
     }
 
-    /// <summary>
-    /// Updates the game time ui which is currently just the lives display and the score display
-    /// </summary>
-    private void UpdateGameUI()
-    {
-        foreach (GameObject lifeObject in lifeObjects)
-        {
-            if (lives > lifeObjects.IndexOf(lifeObject))
-                lifeObject.SetActive(true);
-            else
-                lifeObject.SetActive(false);
-        }
 
-        scoreLabel.text = string.Format("{0}", score);
-    }
 }
