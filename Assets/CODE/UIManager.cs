@@ -92,6 +92,9 @@ public class UIManager : MonoBehaviour
 
                         currentRotatingScreen = rotatingTitleScreens[index];
                     }
+
+                    if (Input.GetKeyDown(KeyCode.Space))
+                        GameManager.instance.OnStartGameButtonPressed();
                 }
                 break;
 

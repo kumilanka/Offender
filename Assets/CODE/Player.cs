@@ -68,12 +68,12 @@ public class Player : MonoBehaviour
         Vector2 viewportPosition = Camera.main.WorldToViewportPoint(transform.position);
 
         // vertical movement is linear on/off type, limited to the camera's viewport
-        if (Input.GetKey(KeyCode.UpArrow) && viewportPosition.y < 0.9f)
+        if ((Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W)) && viewportPosition.y < 0.9f)
         {
             vertical = maxVerticalVelocity;
             //rigidbody2d.velocity = new Vector2(rigidbody2d.velocity.x, maxVerticalVelocity);
         }
-        else if (Input.GetKey(KeyCode.DownArrow) && viewportPosition.y > 0.1f)
+        else if ((Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S)) && viewportPosition.y > 0.1f)
         {
             vertical = -maxVerticalVelocity;
             //rigidbody2d.velocity = new Vector2(rigidbody2d.velocity.x, -maxVerticalVelocity);
@@ -84,7 +84,7 @@ public class Player : MonoBehaviour
         //    //rigidbody2d.velocity = new Vector2(rigidbody2d.velocity.x, 0f);
         //}
 
-        if (Input.GetKey(KeyCode.RightArrow))
+        if ((Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D)))
         {
             if (horizontalVelocity <= maxHorizontalVelocity)
             {
@@ -92,7 +92,7 @@ public class Player : MonoBehaviour
             }
             horizontalVelocity = Mathf.Clamp(horizontalVelocity, -maxHorizontalVelocity, maxHorizontalVelocity);
         }
-        else if (Input.GetKey(KeyCode.LeftArrow))
+        else if ((Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A)))
         {
             if (horizontalVelocity >= -maxHorizontalVelocity)
             {
