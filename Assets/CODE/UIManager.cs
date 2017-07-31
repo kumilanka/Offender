@@ -26,6 +26,9 @@ public class UIManager : MonoBehaviour
 
     public InputField highscoreNameField;
     public Text highscoreScoreLabel;
+    public Text displayMessageLabel; // for displaying messages like Get Ready or something in the middle of the screen during gameplay
+
+    private float displayMessageTimer;
 
     [System.NonSerialized]
     public GameObject currentRotatingScreen;
@@ -56,6 +59,12 @@ public class UIManager : MonoBehaviour
         currentRotatingScreen = rotatingTitleScreens[0];
     }
 
+    public void DisplayMessage(string text, float time = 2f)
+    {
+        displayMessageTimer = time;
+        displayMessageLabel.text = text;
+    }
+
     public void UpdateInitialUIState()
     {
         soundButton.image.sprite = SoundManager.instance.Mute ? soundOffSprite : soundOnSprite;
@@ -66,9 +75,22 @@ public class UIManager : MonoBehaviour
         switch (state)
         {
             case UIStates.Game:
-                UpdateGameUI();
-                gameUI.SetActive(true);
-                startScreen.SetActive(false);
+                {
+                    UpdateGameUI();
+                    gameUI.SetActive(true);
+                    startScreen.SetActive(false);
+
+                    // update display message via timer
+                    displayMessageTimer -= Time.deltaTime;
+                    if (displayMessageTimer <= 0f)
+                    {
+                        displayMessageLabel.gameObject.SetActive(false);
+                    }
+                    else
+                    {
+                        displayMessageLabel.gameObject.SetActive(true);
+                    }
+                }
                 break;
 
             case UIStates.TitleRotation:

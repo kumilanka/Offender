@@ -25,6 +25,7 @@ public class Ammo : MonoBehaviour
         if (c.gameObject.tag == "Enemy")
         {
             c.gameObject.GetComponent<Enemy>().Kill();
+            GameManager.instance.score += 100;
         }
 
         if (c.collider.gameObject.tag != "Player" && c.gameObject.tag != "Ammo")

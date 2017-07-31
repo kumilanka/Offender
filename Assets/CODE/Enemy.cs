@@ -17,6 +17,17 @@ public class Enemy : MonoBehaviour
 
     public float normalSpeed = 2f;
 
+    public enum States
+    {
+        Roam,
+        ChooseTarget,
+        AbductTarget,
+        TransportTarget,
+        SuperMutant,
+        ChasePlayer
+    }
+    public States state;
+
     void Update()
     {
         // let's see here, enemy AI...
@@ -61,8 +72,6 @@ public class Enemy : MonoBehaviour
     {
         Instantiate(explosion, transform.position, Quaternion.identity);
         SoundManager.instance.PlaySound("Explosion");
-
-        GameManager.instance.score += 100;
 
         // if we're using wrap-around, also instantiate an explosion for the copies 
         WrapAroundEdges wrp = GetComponent<WrapAroundEdges>();

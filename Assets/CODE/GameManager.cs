@@ -28,11 +28,22 @@ public class GameManager : MonoBehaviour
 
     private List<GameObject> aliens = new List<GameObject>();
 
+
+    public enum GameStates
+    {
+        Menu,
+        SpawnPlayer,
+        Gameplay
+    }
     [HideInInspector]
+    public GameStates gameState;
     public bool game; // whether the game is running or not (to display title screen)
 
     private float gameTimer;
     public Level currentLevel;
+
+    public float playerSpawnTimer = 2f;
+    private float r_playerSpawnTimer;
 
     public int lives = 3;
     public int score = 0;
@@ -73,7 +84,18 @@ public class GameManager : MonoBehaviour
 	
 	void Update ()
     {
-        if (game)
+        if (gameState == GameStates.SpawnPlayer)
+        {
+            r_playerSpawnTimer -= Time.deltaTime;
+            if (r_playerSpawnTimer <= 0f)
+            {
+                r_playerSpawnTimer = playerSpawnTimer;
+                SpawnPlayer();
+                gameState = GameStates.Gameplay;
+            }
+        }
+
+        if (gameState == GameStates.Gameplay)
         {
             gameTimer += Time.deltaTime;
 
@@ -176,7 +198,7 @@ public class GameManager : MonoBehaviour
         wheelchairs.Clear();
         availableWheelchairs.Clear();
 
-        game = false;
+        gameState = GameStates.Menu;
         SoundManager.instance.PlayMusic("IntroMusic");
 
         if (IsHighScore(score))
@@ -219,7 +241,8 @@ public class GameManager : MonoBehaviour
     public void OnStartGameButtonPressed()
     {
         // press any key to start
-        game = true;
+        gameState = GameStates.SpawnPlayer;
+        UIManager.instance.DisplayMessage("Get Ready!");
         
 
         SoundManager.instance.StopMusic();
@@ -236,7 +259,12 @@ public class GameManager : MonoBehaviour
         if (lives < 1)
             OnGameOver();
         else
-            SpawnPlayer();
+        {
+            UIManager.instance.DisplayMessage("You were Offended.");
+            gameState = GameStates.SpawnPlayer;
+            r_playerSpawnTimer = playerSpawnTimer;
+            //SpawnPlayer();
+        }
     }
 
     public void SpawnPlayer()
@@ -250,9 +278,9 @@ public class GameManager : MonoBehaviour
         gameTimer = 0f;
         lives = 3;
         score = 0;
+        r_playerSpawnTimer = playerSpawnTimer;
 
         currentLevel = levels[0];
-        SpawnPlayer();
     }
 
     public void SpawnWheelchairs()
